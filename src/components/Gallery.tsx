@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import communityElders from "@/assets/community-elders.jpg";
 import communityMeeting from "@/assets/community-meeting.jpg";
@@ -42,6 +42,15 @@ const galleryImages = [
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState<typeof galleryImages[0] | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((current) => (current + 1) % galleryImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section id="gallery" className="py-24 bg-background">
@@ -60,33 +69,49 @@ const Gallery = () => {
           </p>
         </div>
 
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {galleryImages.map((image, index) => (
-            <div
-              key={index}
-              onClick={() => setSelectedImage(image)}
-              className={`group relative overflow-hidden rounded-xl cursor-pointer hover-lift ${
-                index === 0 ? "md:col-span-2 md:row-span-2" : ""
-              }`}
-            >
-              <div className={`aspect-square ${index === 0 ? "md:aspect-auto md:h-full" : ""}`}>
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              </div>
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-primary-foreground font-medium text-sm md:text-base">
-                    {image.caption}
-                  </p>
+        {/* Gallery Slider */}
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-card">
+          <div
+            className="flex transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+          >
+            {galleryImages.map((image, index) => (
+              <div
+                key={index}
+                onClick={() => setSelectedImage(image)}
+                className="group relative w-full shrink-0 cursor-pointer"
+              >
+                <div className="aspect-[16/9] md:aspect-[21/9]">
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                    <p className="text-primary-foreground font-medium text-base md:text-lg">
+                      {image.caption}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-background/80 px-3 py-2 shadow-sm backdrop-blur">
+            {galleryImages.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Go to slide ${index + 1}`}
+                className={`h-2.5 w-2.5 rounded-full transition-colors ${
+                  index === activeIndex ? "bg-primary" : "bg-muted-foreground/40"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
